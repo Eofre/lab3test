@@ -18,3 +18,12 @@
   width: 500px;
   height: 100vh;
 }
+
+.form {
+  max-width: 30%;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+
+}

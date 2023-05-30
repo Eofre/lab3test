@@ -10,156 +10,211 @@
   </head>
   <body>
     <div class="container">
-      <form>
-        <input type="text" />
+      <form class="form" onsubmit="event.preventDefault()"> <!-- Add onsubmit event to prevent form submission -->
+        <label>
+          Высота
+          <input type="text" id="height" />
+          см
+        </label>
+        <label>
+          Ширина
+          <input type="text" id="width" />
+          см
+        </label>
+        <p>Площадь фигуры: <span id="area"></span></p>
+        <button onclick="drawRhombus()">Нарисовать</button>
       </form>
       <div id="box" class="jxgbox"></div>
-      <div id="output"></div>
     </div>
 
     <script type="text/javascript">
-      // Создаем объект JXG.Board и указываем его размеры
-      const board = JXG.JSXGraph.initBoard("box", {
-        boundingbox: [-25, 25, 25, -25],
-        axis: true,
-      });
-      const box = document.getElementById("box");
-      box.style.width = "100vw";
-      box.style.height = "100vh";
-      window.addEventListener("resize", () => {
-        board.resize(box.clientWidth, box.clientHeight);
-      });
+      let board;
 
-      // Создаем точки
-      const A = board.create("point", [-5, 0], {
-        name: "A",
-        size: 4,
-        fixed: true,
-      });
-      const B = board.create("point", [0, 10], {
-        name: "B",
-        size: 4,
-        fixed: true,
-      });
-      const C = board.create("point", [5, 0], {
-        name: "C",
-        size: 4,
-        fixed: true,
-      });
-      const D = board.create("point", [0, -10], {
-        name: "D",
-        size: 4,
-        fixed: true,
-      });
+      function drawRhombus() {
+        const widthInput = document.getElementById("width").value;
+        const heightInput = document.getElementById("height").value;
 
-      // Создаем точки E и F
-      const E = board.create("midpoint", [A, D], { name: "E", size: 4 });
-      const F = board.create("midpoint", [D, C], { name: "F", size: 4 });
+        const width = parseFloat(widthInput);
+        const height = parseFloat(heightInput);
 
-      // Создаем линии для ромба
-      const AB = board.create("line", [A, B], {
-        straightFirst: false,
-        straightLast: false,
-        strokeWidth: 3,
-      });
-      const BC = board.create("line", [B, C], {
-        straightFirst: false,
-        straightLast: false,
-        strokeWidth: 3,
-      });
-      const CD = board.create("line", [C, D], {
-        straightFirst: false,
-        straightLast: false,
-        strokeWidth: 3,
-      });
-      const DA = board.create("line", [D, A], {
-        straightFirst: false,
-        straightLast: false,
-        strokeWidth: 3,
-      });
+        if (
+          isNaN(width) ||
+          isNaN(height) ||
+          width <= 0 ||
+          height <= 0 ||
+          width > 10 ||
+          height > 10
+        ) {
+          alert("Ошибка ввода. Поробуй еще раз, мой дорогой и любимый пользоваетель :)");
+          return;
+        }
 
-      // Создаем линии для треугольника
-      const EB = board.create("line", [E, B], {
-        straightFirst: false,
-        straightLast: false,
-        strokeWidth: 3,
-      });
-      const BF = board.create("line", [B, F], {
-        straightFirst: false,
-        straightLast: false,
-        strokeWidth: 3,
-      });
-      const FE = board.create("line", [F, E], {
-        straightFirst: false,
-        straightLast: false,
-        strokeWidth: 3,
-      });
+        if (board) {
+          board.suspendUpdate();
+          board.removeObject(board.objects);
+          board.fullUpdate();
+        }
 
-      // Задаем цвет заливки для треугольника
-      const triangle = board.create("polygon", [E, B, F], {
-        fillColor: "#c0c0c0",
-      });
+        const box = document.getElementById("box");
+        box.style.width = "100vw";
+        box.style.height = "100vh";
+        board = JXG.JSXGraph.initBoard("box", {
+          boundingbox: [-width, height, width, -height],
+          axis: true,
+        });
 
-      // const J = board.create("midpoint", [E, F], { name: "J", size: 4 });
-
-      //длина EF
-      const lengthEF = FE.L();
-      const lengthBF = BF.L();
-
-      const radius =
-        (lengthEF / 2) *
-        Math.sqrt((2 * lengthBF - lengthEF) / (2 * lengthBF + lengthEF));
-      console.log(radius);
-
-      //биссектрисы треугольника
-      const bisectorE = board.create("bisector", [F, E, B], { visible: false });
-      const bisectorB = board.create("bisector", [F, B, E], { visible: false });
-      const bisectorF = board.create("bisector", [B, F, E], { visible: false });
-
-      //центр окружности
-      const incenter = board.create(
-        "intersection",
-        [bisectorE, bisectorB, bisectorF],
-        { visible: false }
-      );
-
-      const circle = board.create("circle", [incenter, radius]);
-
-      const intersection1 = board.create("intersection", [circle, BF, 0]);
-      const intersection2 = board.create("intersection", [circle, EB, 0]);
-      const intersection3 = board.create("intersection", [circle, FE, 0]);
-
-      // Create new points for the intersections
-      const H = board.create("point", [intersection1.X(), intersection1.Y()], {
-        name: "H",
-        size: 4,
-        fixed: true,
-      });
-      const G = board.create("point", [intersection2.X(), intersection2.Y()], {
-        name: "G",
-        size: 4,
-        fixed: true,
-      });
-      const J = board.create("point", [intersection3.X(), intersection3.Y()], {
-        name: "J",
-        size: 4,
-        fixed: true,
-      });
-
-      const triangleGBH = board.create("polygon", [G, B, H], {
-        fillColor: "#ffcc00", // цвет заливки треугольника
-        borders: { strokeColor: "#000000" }, // цвет и толщина линий
-      });
-
-      const T = board.create(
-        "point",
-        [(G.X() + H.X()) / 2, (G.Y() + H.Y()) / 2],
-        {
-          name: "T",
+        const A = board.create("point", [-width / 2, 0], {
+          name: "A",
           size: 4,
           fixed: true,
-        }
-      );
+        });
+        const B = board.create("point", [0, height / 2], {
+          name: "B",
+          size: 4,
+          fixed: true,
+        });
+        const C = board.create("point", [width / 2, 0], {
+          name: "C",
+          size: 4,
+          fixed: true,
+        });
+        const D = board.create("point", [0, -height / 2], {
+          name: "D",
+          size: 4,
+          fixed: true,
+        });
+
+        const E = board.create("midpoint", [A, D], { name: "E", size: 4 });
+        const F = board.create("midpoint", [D, C], { name: "F", size: 4 });
+
+        const AB = board.create("line", [A, B], {
+          straightFirst: false,
+          straightLast: false,
+          strokeWidth: 3,
+        });
+        const BC = board.create("line", [B, C], {
+          straightFirst: false,
+          straightLast: false,
+          strokeWidth: 3,
+        });
+        const CD = board.create("line", [C, D], {
+          straightFirst: false,
+          straightLast: false,
+          strokeWidth: 3,
+        });
+        const DA = board.create("line", [D, A], {
+          straightFirst: false,
+          straightLast: false,
+          strokeWidth: 3,
+        });
+
+        const EB = board.create("line", [E, B], {
+          straightFirst: false,
+          straightLast: false,
+          strokeWidth: 3,
+        });
+        const BF = board.create("line", [B, F], {
+          straightFirst: false,
+          straightLast: false,
+          strokeWidth: 3,
+        });
+        const FE = board.create("line", [F, E], {
+          straightFirst: false,
+          straightLast: false,
+          strokeWidth: 3,
+        });
+
+        const triangle = board.create("polygon", [E, B, F], {
+          fillColor: "#c0c0c0",
+        });
+
+        const lengthEF = FE.L();
+        const lengthBF = BF.L();
+
+        const radius =
+          (lengthEF / 2) *
+          Math.sqrt((2 * lengthBF - lengthEF) / (2 * lengthBF + lengthEF));
+        console.log(radius);
+
+        const bisectorE = board.create("bisector", [F, E, B], { visible: false });
+        const bisectorB = board.create("bisector", [F, B, E], { visible: false });
+        const bisectorF = board.create("bisector", [B, F, E], { visible: false });
+
+        const incenter = board.create(
+          "intersection",
+          [bisectorE, bisectorB, bisectorF],
+          { visible: false }
+        );
+
+        const circle = board.create("circle", [incenter, radius]);
+
+        const intersection1 = board.create("intersection", [circle, BF, 0]);
+        const intersection2 = board.create("intersection", [circle, EB, 0]);
+        const intersection3 = board.create("intersection", [circle, FE, 0]);
+
+        const H = board.create(
+          "point",
+          [intersection1.X(), intersection1.Y()],
+          { name: "H", size: 4, fixed: true }
+        );
+        const G = board.create(
+          "point",
+          [intersection2.X(), intersection2.Y()],
+          { name: "G", size: 4, fixed: true }
+        );
+        const J = board.create(
+          "point",
+          [intersection3.X(), intersection3.Y()],
+          { name: "J", size: 4, fixed: true }
+        );
+
+        const triangleGBH = board.create("polygon", [G, B, H], {
+          visible: false,
+        });
+
+     
+
+        const GB = board.create("line", [G, B], {
+        straightFirst: false,
+        straightLast: false,
+        strokeWidth: 3,
+      });
+      const BH = board.create("line", [B, H], {
+        straightFirst: false,
+        straightLast: false,
+        strokeWidth: 3,
+      });
+      const HG = board.create("line", [H, G], {
+        straightFirst: false,
+        straightLast: false,
+        strokeWidth: 3,
+        visible: false,
+      });
+
+
+
+        const lengthGB = GB.L();
+        const lengthBH = BH.L();
+        const lengthHG = HG.L();
+
+        // Находим полупериметр треугольника GBH
+        const semiPerimeter = (lengthGB + lengthBH + lengthHG) / 2;
+
+        // Применяем формулу Герона для нахождения площади треугольника GBH
+        const areaGBH = Math.sqrt(
+          semiPerimeter *
+            (semiPerimeter - lengthGB) *
+            (semiPerimeter - lengthBH) *
+            (semiPerimeter - lengthHG)
+        );
+
+        // alert(`Площадь фигуры: ${areaGBH}`);
+        const areaText = document.getElementById('area');
+        areaText.innerHTML = areaGBH
+
+
+        board.unsuspendUpdate();
+      }
     </script>
   </body>
 </html>
