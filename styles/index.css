@@ -1,29 +1,75 @@
-/* body {
-  background-color: #b2b2b2;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  background-color: #f4f4f4;
 }
 
 .container {
-  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin: 0 auto;
-}
-.jxgbox {
-  width: 500px;
-  height: 500px;
-  margin-top: 100px;
-  width: 100%;
+  max-width: 550px;
   height: 100vh;
-} */
-
-.jxgbox {
-  width: 500px;
-  height: 100vh;
+  position: relative;
 }
 
 .form {
-  max-width: 30%;
-  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  padding: 7px;
+  gap: 6px;
+}
 
+.form label {
+  font-size: 18px;
+  color: #333;
+}
+
+.form input {
+  padding: 5px 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 120px;
+}
+
+.info-area {
+  font-size: 18px;
+  color: #333;
+}
+
+.jxgbox {
+  max-width: 550px;
+  height: 100vh;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 18px;
+  background-color: rgb(242, 157, 0);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  box-shadow: 0px 0px 10px #0000005f;
+}
+
+#area {
+  font-weight: bold;
+  color: #333;
+}
+
+.info {
+  font-size: 12px;
+  color: #f70a0a;
 }

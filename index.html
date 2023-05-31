@@ -2,246 +2,29 @@
 <html>
   <head>
     <title>Тестирование</title>
-    <link rel="stylesheet" href="./styles/index.css" />
     <script
       type="text/javascript"
       src="https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/1.3.0/jsxgraphcore.js"
     ></script>
+    <link rel="stylesheet" href="./styles/index.css" />
   </head>
   <body>
     <div class="container">
+      <div></div>
       <form class="form" onsubmit="event.preventDefault()">
-        <!-- Add onsubmit event to prevent form submission -->
-        <label>
-          Диагонали ромба
-          <input type="text" id="diagonals" />
-          см
-        </label>
-        <p>Площадь фигуры: <span id="area"></span></p>
+        <label for="diagonals"
+          >Введите длину диагоналей ромба:
+          <input type="text" id="diagonals" placeholder="Например: 5" />
+          <span>см</span></label
+        >
+        <p class="info">
+          *Длина не должна превышать 10 см и не должна быть меньше 1 см!
+        </p>
+        <p class="info-area"><span id="area"></span></p>
         <button onclick="drawFigure()">Нарисовать</button>
       </form>
       <div id="box" class="jxgbox"></div>
     </div>
-
-    <script type="text/javascript">
-      let board;
-
-      function drawFigure() {
-        const diagonals = inputDiagonals();
-
-        if (board) {
-          clearBoard();
-        }
-
-        const box = document.getElementById("box");
-        box.style.width = "100vw";
-        box.style.height = "100vh";
-        board = JXG.JSXGraph.initBoard("box", {
-          boundingbox: [-diagonals, diagonals, diagonals, -diagonals],
-          axis: true,
-        });
-
-        drawRhombs(board, diagonals);
-        drawTriangle(board);
-        drawCircle(board);
-        calculateArea(board);
-      }
-
-      function inputDiagonals() {
-        const diagonalsInput = document.getElementById("diagonals").value;
-
-        if (
-          isNaN(diagonalsInput) ||
-          diagonalsInput <= 0 ||
-          diagonalsInput > 10
-        ) {
-          alert(
-            "Ошибка ввода. Поробуй еще раз, мой дорогой и любимый пользоваетель :)"
-          );
-          return;
-        }
-
-        const diagonals = parseFloat(diagonalsInput);
-
-        return diagonals;
-      }
-
-      function clearBoard() {
-        board.suspendUpdate();
-        board.removeObject(board.objects);
-        board.fullUpdate();
-      }
-
-      function drawRhombs(board, diagonals) {
-        const A = board.create("point", [-diagonals / 2, 0], {
-          name: "A",
-          size: 4,
-          fixed: true,
-        });
-        const B = board.create("point", [0, diagonals / 2], {
-          name: "B",
-          size: 4,
-          fixed: true,
-        });
-        const C = board.create("point", [diagonals / 2, 0], {
-          name: "C",
-          size: 4,
-          fixed: true,
-        });
-        const D = board.create("point", [0, -diagonals / 2], {
-          name: "D",
-          size: 4,
-          fixed: true,
-        });
-
-        const AB = board.create("line", [A, B], {
-          straightFirst: false,
-          straightLast: false,
-          strokeWidth: 3,
-        });
-        const BC = board.create("line", [B, C], {
-          straightFirst: false,
-          straightLast: false,
-          strokeWidth: 3,
-        });
-        const CD = board.create("line", [C, D], {
-          straightFirst: false,
-          straightLast: false,
-          strokeWidth: 3,
-        });
-        const DA = board.create("line", [D, A], {
-          straightFirst: false,
-          straightLast: false,
-          strokeWidth: 3,
-        });
-      }
-
-      function drawTriangle(board) {
-        const A = board.select("A");
-        const B = board.select("B");
-        const C = board.select("C");
-        const D = board.select("D");
-
-        const E = board.create("midpoint", [A, D], { name: "E", size: 4 });
-        const F = board.create("midpoint", [D, C], { name: "F", size: 4 });
-
-        const triangle = board.create("polygon", [E, B, F], {
-          fillColor: "#c0c0c0",
-        });
-      }
-
-      function drawCircle(board) {
-        const F = board.select("F");
-        const E = board.select("E");
-        const B = board.select("B");
-
-        const EB = board.create("line", [E, B], {
-          straightFirst: false,
-          straightLast: false,
-          strokeWidth: 3,
-        });
-
-        const BF = board.create("line", [B, F], {
-          straightFirst: false,
-          straightLast: false,
-          strokeWidth: 3,
-        });
-        const FE = board.create("line", [F, E], {
-          straightFirst: false,
-          straightLast: false,
-          strokeWidth: 3,
-        });
-
-        const lengthEF = FE.L();
-        const lengthBF = BF.L();
-
-        const radius =
-          (lengthEF / 2) *
-          Math.sqrt((2 * lengthBF - lengthEF) / (2 * lengthBF + lengthEF));
-
-        const bisectorE = board.create("bisector", [F, E, B], {
-          visible: false,
-        });
-        const bisectorB = board.create("bisector", [F, B, E], {
-          visible: false,
-        });
-        const bisectorF = board.create("bisector", [B, F, E], {
-          visible: false,
-        });
-
-        const incenter = board.create(
-          "intersection",
-          [bisectorE, bisectorB, bisectorF],
-          { visible: false }
-        );
-
-        const circle = board.create("circle", [incenter, radius]);
-
-        const intersection1 = board.create("intersection", [circle, BF, 0]);
-        const intersection2 = board.create("intersection", [circle, EB, 0]);
-        const intersection3 = board.create("intersection", [circle, FE, 0]);
-
-        const H = board.create(
-          "point",
-          [intersection1.X(), intersection1.Y()],
-          { name: "H", size: 4, fixed: true }
-        );
-        const G = board.create(
-          "point",
-          [intersection2.X(), intersection2.Y()],
-          { name: "G", size: 4, fixed: true }
-        );
-        const J = board.create(
-          "point",
-          [intersection3.X(), intersection3.Y()],
-          { name: "J", size: 4, fixed: true }
-        );
-      }
-
-      function calculateArea(board) {
-        const G = board.select("G");
-        const B = board.select("B");
-        const H = board.select("H");
-
-        const triangleGBH = board.create("polygon", [G, B, H], {
-          visible: false,
-        });
-
-        const GB = board.create("line", [G, B], {
-          straightFirst: false,
-          straightLast: false,
-          strokeWidth: 3,
-        });
-        const BH = board.create("line", [B, H], {
-          straightFirst: false,
-          straightLast: false,
-          strokeWidth: 3,
-        });
-        const HG = board.create("line", [H, G], {
-          straightFirst: false,
-          straightLast: false,
-          strokeWidth: 3,
-          visible: false,
-        });
-
-        const lengthGB = GB.L();
-        const lengthBH = BH.L();
-        const lengthHG = HG.L();
-
-        const semiPerimeter = (lengthGB + lengthBH + lengthHG) / 2;
-
-        const areaGBH = Math.sqrt(
-          semiPerimeter *
-            (semiPerimeter - lengthGB) *
-            (semiPerimeter - lengthBH) *
-            (semiPerimeter - lengthHG)
-        );
-
-        const areaText = document.getElementById("area");
-        areaText.innerHTML = areaGBH;
-
-        board.unsuspendUpdate();
-      }
-    </script>
+    <script src="./index.js" type="text/javascript"></script>
   </body>
 </html>
